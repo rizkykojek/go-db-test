@@ -2,6 +2,7 @@ package golang_db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 	"time"
@@ -50,7 +51,7 @@ func TestQuerySqlComplete(t *testing.T) {
 
 	ctx := context.Background()
 
-	script := "SELECT id, name, balance, rating, birth_date, married, created_at FROM customer"
+	script := "SELECT id, name, balance, rating, birth_date, married, created_at, email FROM customer"
 	rows, err := db.QueryContext(ctx, script)
 	defer rows.Close()
 	if err != nil {
@@ -59,11 +60,25 @@ func TestQuerySqlComplete(t *testing.T) {
 
 	for rows.Next() {
 		var id, name string
+		var email sql.NullString
 		var balance int32
 		var rating float32
 		var married bool
-		var createdAt, birthDate time.Time
-		rows.Scan(&id, &name, &balance, &rating, &birthDate, &married, &createdAt)
-		fmt.Println("ID = ", id, ", Name = ", name, ", Balance = ", balance, ", birth date = ", birthDate, ", married = ", married, ", created_at = ", createdAt)
+		var createdAt time.Time
+		var birthDate sql.NullTime
+
+		rows.Scan(&id, &name, &balance, &rating, &birthDate, &married, &createdAt, &email)
+		fmt.Println("================")
+		fmt.Println("ID = ", id)
+		fmt.Println("Name = ", name)
+		if email.Valid {
+			fmt.Println("Email = ", email.String)
+		}
+		fmt.Println("Balance = ", balance)
+		if birthDate.Valid {
+			fmt.Println("Birth date = ", birthDate.Time)
+		}
+		fmt.Println("Married = ", married)
+		fmt.Println("Created at = ", createdAt)
 	}
 }
