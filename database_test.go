@@ -20,7 +20,7 @@ func TestOpenConnection(t *testing.T) {
 	defer db.Close()
 }
 
-func TestOpenPoolConnection(t *testing.T) {
+func TestOpenPoolConnectionUsingPgxPool(t *testing.T) {
 	db, err := pgxpool.Connect(context.Background(), "postgresql://localhost/go-db?user=rizkymaulana&password=")
 	if err != nil {
 		panic(err)
