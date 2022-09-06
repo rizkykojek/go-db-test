@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -19,6 +20,29 @@ func TestInsertSql(t *testing.T) {
 	_, err := db.ExecContext(ctx, script, paramID, paramName)
 	if err != nil {
 		panic(err)
+	}
+
+	fmt.Println("Success insert")
+}
+
+func TestInsertSqlUsingPreparedStatement(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+	script := "INSERT INTO customer(id,name) VALUES($1, $2)"
+	statement, err := db.PrepareContext(ctx, script)
+	defer statement.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 5; i < 10; i++ {
+		paramName := "kojek_" + strconv.Itoa(i)
+		_, err := statement.ExecContext(ctx, strconv.Itoa(i), paramName)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	fmt.Println("Success insert")
