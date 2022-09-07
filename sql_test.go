@@ -73,7 +73,11 @@ func TestInsertSqlUsingTransaction(t *testing.T) {
 	selectTotal := "SELECT count(*) FROM customer"
 	var total int64
 	row := db.QueryRowContext(ctx, selectTotal)
-	row.Scan(&total)
+
+	err = row.Scan(&total)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Total row before commit = ", total)
 
 	err = tx.Commit()
@@ -82,7 +86,10 @@ func TestInsertSqlUsingTransaction(t *testing.T) {
 	}
 
 	row = db.QueryRowContext(ctx, selectTotal)
-	row.Scan(&total)
+	err = row.Scan(&total)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Total row after commit = ", total)
 
 	fmt.Println("Success insert")
