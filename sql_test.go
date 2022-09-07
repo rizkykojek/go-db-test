@@ -48,6 +48,46 @@ func TestInsertSqlUsingPreparedStatement(t *testing.T) {
 	fmt.Println("Success insert")
 }
 
+func TestInsertSqlUsingTransaction(t *testing.T) {
+	db := GetConnection()
+	defer db.Close()
+
+	ctx := context.Background()
+	script := "INSERT INTO customer(id,name) VALUES($1, $2)"
+	tx, err := db.Begin()
+
+	statement, err := tx.PrepareContext(ctx, script)
+	defer statement.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 5; i < 10; i++ {
+		paramName := "kojek_" + strconv.Itoa(i)
+		_, err := statement.ExecContext(ctx, strconv.Itoa(i), paramName)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	selectTotal := "SELECT count(*) FROM customer"
+	var total int64
+	row := db.QueryRowContext(ctx, selectTotal)
+	row.Scan(&total)
+	fmt.Println("Total row before commit = ", total)
+
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
+
+	row = db.QueryRowContext(ctx, selectTotal)
+	row.Scan(&total)
+	fmt.Println("Total row after commit = ", total)
+
+	fmt.Println("Success insert")
+}
+
 func TestQuerySql(t *testing.T) {
 	db := GetConnection()
 	defer db.Close()
